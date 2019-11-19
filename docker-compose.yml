@@ -1,0 +1,39 @@
+version: '3.7'
+services:
+
+  web:
+    image: nginx:1.17
+    volumes:
+      - ./:/var/www/
+      - ./docker/nginx/site.conf:/etc/nginx/conf.d/site.conf
+    links:
+      - php
+      - mariadb
+    ports:
+      - "80:80"
+
+  php:
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
+    volumes:
+      - ./:/var/www/
+      - ./docker/php/php.ini:/usr/local/etc/php/php.ini
+    links:
+      - mariadb
+      - redis
+
+  mariadb:
+    image: mariadb:10.4
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: app
+      MYSQL_USER: app
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3306:3306"
+
+  redis:
+    image: redis:5.0
+    ports:
+      - "6379:6379"
